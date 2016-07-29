@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/android-curve-animator.iml" filepath="$PROJECT_DIR$/android-curve-animator.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/beziercurve/beziercurve.iml" filepath="$PROJECT_DIR$/beziercurve/beziercurve.iml" />
+      <module fileurl="file://$PROJECT_DIR$/curve-animate/curve-animate.iml" filepath="$PROJECT_DIR$/curve-animate/curve-animate.iml" />
     </modules>
   </component>
 </project>
