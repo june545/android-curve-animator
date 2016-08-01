@@ -6,10 +6,14 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.PointF;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
+
+import com.example.util.HeartDrawer;
 
 /**
  * Created by June on 2016/7/29.
@@ -97,5 +101,6 @@ public class CircleAnimationView extends View {
 
 		canvas.restore();
 	}
+
 
 }
