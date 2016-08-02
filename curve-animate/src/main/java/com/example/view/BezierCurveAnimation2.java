@@ -25,7 +25,8 @@ import java.util.Random;
 /**
  * Created by June on 2016/7/29.
  */
-public class BezierCurveAnimation1 extends View {
+public class BezierCurveAnimation2 extends View {
+	static final int DURATION = 4000;
 
 	Path mPath;
 	PathMeasure pathMeasure;
@@ -34,7 +35,7 @@ public class BezierCurveAnimation1 extends View {
 	float sizeScale;
 	boolean animatorEnd = true;
 
-	public BezierCurveAnimation1(Context context, AttributeSet attrs) {
+	public BezierCurveAnimation2(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		init();
 	}
@@ -43,15 +44,17 @@ public class BezierCurveAnimation1 extends View {
 		setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				if(!animatorEnd){
-					return;
-				}
-				anim();
+//				anim();
+				testMulti();
 			}
 		});
 	}
 
 	private void anim(	){
+		if(!animatorEnd){
+			return;
+		}
+
 		animatorEnd = false;
 		pathMeasure = new PathMeasure(mPath,false);
 		float length = pathMeasure.getLength();
@@ -129,11 +132,17 @@ public class BezierCurveAnimation1 extends View {
 		paint.setStrokeWidth(3);
 		paint.setStyle(Paint.Style.STROKE);
 
-		if(animatorEnd)
-		drawPath(canvas, w, h);
+//		if(animatorEnd)
+//		drawPath(canvas, w, h);
 
-		if(mPoint != null){
-			HeartDrawer.drawHeart1(canvas, mPoint.x, mPoint.y, 50 * sizeScale, mAlpha);
+//		if(mPoint != null){
+//			HeartDrawer.drawHeart1(canvas, mPoint.x, mPoint.y, 50 * sizeScale, mAlpha);
+//		}
+
+		if(holders != null && holders.size() > 0){
+			for (ShapeHolder holder : holders){
+				holder.draw(canvas);
+			}
 		}
 
 		canvas.restore();
@@ -142,10 +151,11 @@ public class BezierCurveAnimation1 extends View {
 	// 至少画两个点
 	private void drawPath(Canvas canvas, int w, int h){
 		Paint paint = new Paint();
-		paint.setStrokeWidth(1);
+		paint.setColor(Color.GREEN);
+		paint.setStrokeWidth(3);
 		paint.setStyle(Paint.Style.STROKE);
 
-		List<Point> points = buildPoints(w, h, 5, w/5);
+		List<Point> points = buildPoints(w, h, new Random().nextInt(3) + 2, w/5);
 		Collections.reverse(points);
 		List<Point> midPoints = midPoints(points);
 		List<Point> midMidPoints = midPoints(midPoints);
@@ -178,20 +188,20 @@ public class BezierCurveAnimation1 extends View {
 			}
 		}
 
-//		canvas.drawPath(path, paint);
+		canvas.drawPath(path, paint);
 		mPath = path;
 	}
 
-
+	Random random = new Random(System.currentTimeMillis());
 	private List<Point> buildPoints(int w, int h, int count, int range){
-		List<Point> points = new ArrayList<>();
 		Random random = new Random();
+		List<Point> points = new ArrayList<>();
 		for(int i = 0; i < count; i++){
 			int x;
 			if(random.nextInt(2) % 2 == 0){
-				x = w/2 + random.nextInt(range);
+				x = (int) (w/2 + random.nextInt(range/2) + range /4F * (count-i));
 			}else{
-				x = w/2 - random.nextInt(range);
+				x = (int) (w/2 - random.nextInt(range/2) - range/ 4F * (count-i));
 			}
 
 			if(i == 0){
@@ -248,4 +258,148 @@ public class BezierCurveAnimation1 extends View {
 		}
 	}
 
+	// 至少画两个点
+	private Path buildBezierPath(int w, int h){
+		List<Point> points = buildPoints(w, h, 5, w/4);
+		Collections.reverse(points);
+		List<Point> midPoints = midPoints(points);
+		List<Point> midMidPoints = midPoints(midPoints);
+
+		//		drawSegmentPath(canvas, points);
+		//		drawPoint(canvas, midPoints, Color.BLUE);
+		//		drawPoint(canvas, midMidPoints, Color.GREEN);
+
+		List<Point> ctrlPoints = new ArrayList<>();
+		for (int i=0; i < midMidPoints.size(); i++){
+			int x1 = points.get(i+1).x - midMidPoints.get(i).x + midPoints.get(i).x;
+			int y1 = points.get(i+1).y - midMidPoints.get(i).y + midPoints.get(i).y;
+			ctrlPoints.add(new Point(x1, y1));
+
+			int x2 = points.get(i+1).x - midMidPoints.get(i).x + midPoints.get(i+1).x;
+			int y2 = points.get(i+1).y - midMidPoints.get(i).y + midPoints.get(i+1).y;
+			ctrlPoints.add(new Point(x2, y2));
+		}
+		//		drawPoint(canvas, ctrlPoints, Color.YELLOW);
+
+		Path path = new Path();
+		for (int i=0; i < points.size(); i++){
+			if(i == 0){
+				path.moveTo(points.get(i).x, points.get(i).y);
+				path.quadTo(ctrlPoints.get(i).x, ctrlPoints.get(i).y, points.get(i+1).x, points.get(i+1).y);
+			}else if(i < points.size() - 2){
+				path.cubicTo(ctrlPoints.get(i*2-1).x, ctrlPoints.get(i*2-1).y, ctrlPoints.get(i*2).x, ctrlPoints.get(i*2).y, points.get(i+1).x, points.get(i+1).y);
+			}else if(i == points.size() -2){
+				path.quadTo(ctrlPoints.get(i*2-1).x, ctrlPoints.get(i*2-1).y, points.get(i+1).x, points.get(i+1).y);
+			}
+		}
+
+		return  path;
+	}
+
+	List<ShapeHolder> holders;
+
+	private void testMulti(){
+		holders = new ArrayList<>();
+		int w = getRight() - getLeft();
+		int h = getBottom() - getTop();
+		System.out.println("1 ################ " + w + ",  " + h);
+		for(int i = 0; i < 5; i++){
+			ShapeHolder holder = new ShapeHolder();
+			holder.setPath(buildBezierPath(w, h));
+			holders.add(holder);
+		}
+
+		ValueAnimator valueAnimator = ValueAnimator.ofInt(1000);
+		valueAnimator.setDuration(DURATION);
+		valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+			@Override
+			public void onAnimationUpdate(ValueAnimator valueAnimator) {
+				invalidate();
+			}
+		});
+		valueAnimator.start();
+
+		for (ShapeHolder holder : holders){
+			holder.start();
+		}
+	}
+
+	class ShapeHolder{
+		int         color;
+		Path        path;
+		PathMeasure pathMeasure;
+		PointF      pointF;
+		int         mAlpha;
+		float       sizeScale;
+		boolean animatorEnd = true;
+
+		public ShapeHolder(){
+			Random random = new Random();
+			color = Color.rgb(random.nextInt(255), random.nextInt(255), random.nextInt(255));
+			System.out.println("3 ################ " + color);
+		}
+
+		public void setPath(Path path){
+			this.path = path;
+		}
+
+		public Path getPath(){
+			return path;
+		}
+
+		private void startAnim(){
+			animatorEnd = false;
+			pathMeasure = new PathMeasure(path,false);
+			float length = pathMeasure.getLength();
+			ValueAnimator animator = ValueAnimator.ofFloat(length);
+			animator.setDuration(DURATION);
+			animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+				@Override
+				public void onAnimationUpdate(ValueAnimator animation) {
+					float l = (float) animation.getAnimatedValue();
+					float[] pos = new float[2];
+					pathMeasure.getPosTan(l, pos, null);
+					pointF = new PointF(pos[0], pos[1]);
+				}
+			});
+
+			ValueAnimator aVA = ValueAnimator.ofInt(255, 255, 255, 0);
+			aVA.setDuration((long) (new Random().nextInt((int) (DURATION / 5F)) + DURATION / 5F * 4));
+			aVA.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+				@Override
+				public void onAnimationUpdate(ValueAnimator animation) {
+					mAlpha = (int) animation.getAnimatedValue();
+				}
+			});
+
+			ValueAnimator scaleAnim = ValueAnimator.ofFloat(0, 1F);
+			scaleAnim.setCurrentPlayTime(500);
+			scaleAnim.setDuration(1000);
+			scaleAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+				@Override
+				public void onAnimationUpdate(ValueAnimator valueAnimator) {
+					sizeScale = (float) valueAnimator.getAnimatedValue();
+				}
+			});
+
+			AnimatorSet animatorSet = new AnimatorSet();
+			animatorSet.setInterpolator(new DecelerateInterpolator());
+			animatorSet.play(animator).with(aVA).with(scaleAnim);
+			animatorSet.start();
+		}
+
+		public void draw(Canvas canvas){
+			System.out.println("2 ################ " + pointF.x + ",  " + pointF.y + " " + path);
+			HeartDrawer.drawHeart1(canvas, pointF.x, pointF.y, 30 * sizeScale, mAlpha, color);
+//			Paint paint = new Paint();
+//			paint.setColor(Color.GREEN);
+//			paint.setStrokeWidth(3);
+//			paint.setStyle(Paint.Style.STROKE);
+//			canvas.drawPath(path, paint);
+		}
+
+		public void start(){
+			startAnim();
+		}
+	}
 }

@@ -51,10 +51,10 @@ public class HeartDrawer {
      * @param y 中间凹槽点y
      * @param r 左右两个圆的半径，决定了图案的大小
      */
-    public static void drawHeart1(Canvas canvas, float x, float y, float r, int alpha){
+    public static void drawHeart1(Canvas canvas, float x, float y, float r, int alpha, int color){
         Paint paint = new Paint();
         paint.setStyle(Paint.Style.FILL);
-        paint.setColor(Color.RED);
+        paint.setColor(color);
         paint.setAlpha(alpha);
 
         float dh = r * 2.5f;
@@ -85,5 +85,9 @@ public class HeartDrawer {
 
         canvas.drawArc(new RectF(o1x - r, o1y - r, o1x + r, o1y + r), (float) (90 + d2), (float) (270 - d2), true, paint);
         canvas.drawArc(new RectF(o2x - r, o2y - r, o2x + r, o2y + r), 180, (float) (270 - d2) , true, paint);
+    }
+
+    public static void drawHeart1(Canvas canvas, float x, float y, float r, int alpha){
+        drawHeart1(canvas, x, y, r, alpha, Color.RED);
     }
 }
