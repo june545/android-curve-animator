@@ -123,7 +123,7 @@ public class BezierCurveAnimation1 extends View {
 
 		if(mPoint != null){
 			canvas.drawPath(mPath, paint);
-			HeartDrawer.drawHeart(canvas, mPoint.x, mPoint.y, 30, mAlpha);
+			HeartDrawer.drawHeart1(canvas, mPoint.x, mPoint.y, 200, mAlpha);
 		}
 
 		canvas.restore();

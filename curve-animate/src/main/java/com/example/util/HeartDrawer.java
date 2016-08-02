@@ -4,6 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.RectF;
 
 /**
  * Created by June on 2016/8/1.
@@ -36,11 +37,11 @@ public class HeartDrawer {
 
         int r = (int) Math.sqrt((p1x - p2x)*(p1x - p2x) + (p1y - p2y)*(p1y - p2y)) / 2;
 
-        float o1x = (p1x + p2x)/2, o1y = (p1y + p2y)/2;
-        canvas.drawCircle(o1x, o1y, r, paint);
+        float o1x = (p1x + p2x)/2 + 0.5F, o1y = (p1y + p2y)/2 + 0.5F;
+        canvas.drawArc(new RectF(o1x - r, o1y - r, o1x + r, o1y + r), 135, 180, true, paint);
 
-        float o2x = (p2x + p3x)/2, o2y = (p2y + p3y)/2;
-        canvas.drawCircle(o2x, o2y, r, paint);
+        float o2x = (p2x + p3x)/2 + 0.5F, o2y = (p2y + p3y)/2 - 0.5F;
+        canvas.drawArc(new RectF(o2x - r, o2y - r, o2x + r, o2y + r), 225, 180, true, paint);
     }
 
     /**
@@ -61,26 +62,28 @@ public class HeartDrawer {
         float o1x = x - r, o1y = y;
         float o2x = x + r, o2y = y;
 
-        canvas.drawCircle(o1x, o1y, r, paint);
-        canvas.drawCircle(o2x, o2y, r, paint);
-
         float bottomX = x, bottomY = y + dh;
         double radius = Math.atan((double)r / dh);
-        double degree = Math.toDegrees(radius);
+        double d1 = Math.toDegrees(radius);
 
-        double d = 90 - degree - degree;
-        double radius2 = Math.toRadians(d);
+        double d2 = 90 - d1 - d1;
+        double radius2 = Math.toRadians(d2);
         double delX = Math.sin(radius2) * r;
         double delY = Math.cos(radius2) * r;
 
-        float lx = (float) (x - r - delX), ly = (float) (y + delY);
-        float rx = (float) (x + r + delX), ry = (float) (y + delY);
+        float lx = (float) (x - r - delX), ly = (float) (y + delY); // 左圆切点
+        float rx = (float) (x + r + delX), ry = (float) (y + delY); // 右圆切点
 
         Path p = new Path();
         p.moveTo(lx, ly);
+        p.lineTo(o1x, o1y);
         p.lineTo(x, y);
+        p.lineTo(o2x, o2y);
         p.lineTo(rx, ry);
         p.lineTo(bottomX, bottomY);
         canvas.drawPath(p, paint);
+
+        canvas.drawArc(new RectF(o1x - r, o1y - r, o1x + r, o1y + r), (float) (90 + d2), (float) (270 - d2), true, paint);
+        canvas.drawArc(new RectF(o2x - r, o2y - r, o2x + r, o2y + r), 180, (float) (270 - d2) , true, paint);
     }
 }
