@@ -2,6 +2,7 @@ package com.example.view;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
@@ -19,15 +20,21 @@ import java.util.Vector;
 /**
  * Created by June on 2016/8/2.
  */
-public class BezierSurface extends SurfaceView implements SurfaceHolder.Callback {
-    static final int DURATION = 5000;
+public class BezierSurfaceWithCalc extends SurfaceView implements SurfaceHolder.Callback {
+
+    static final int FRESH_FREQUENCY = 40; // ms
 
     final Object LOCK = new Object();
-    Vector<ShapeHolder> holders = new Vector<>();
+    Vector<ShapeHolderWithCalc> holders = new Vector<>();
 
     MyThread updateThread;
 
-    public BezierSurface(Context context, AttributeSet attrs) {
+    Paint mPaint = new Paint();
+
+    private int mWidth;
+    private int mHeight;
+
+    public BezierSurfaceWithCalc(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
     }
@@ -46,15 +53,32 @@ public class BezierSurface extends SurfaceView implements SurfaceHolder.Callback
     }
 
     private void addShapeHolder() {
-        int w = getRight() - getLeft();
-        int h = getBottom() - getTop();
-        ShapeHolder holder = new ShapeHolder();
-        holder.setPath(CanvasUtil.buildBezierPath(w, h));
-        holder.setDuration(DURATION);
+        ShapeHolderWithCalc holder = new ShapeHolderWithCalc();
+        holder.setPath(CanvasUtil.buildBezierPath(mWidth, mHeight));
+        holder.setPaint(mPaint);
         synchronized (LOCK) {
             holders.add(holder);
         }
         holder.start();
+    }
+
+
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        canvas.save();
+        mPaint.setStyle(Paint.Style.STROKE);
+        mPaint.setColor(Color.YELLOW);
+        canvas.drawRect(2, 2, mWidth, mHeight, mPaint);
+        canvas.restore();
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        this.mWidth = w;
+        this.mHeight = h;
+        System.out.println(" onSizeChanged------ w=" + w + ", h=" + h);
     }
 
     @Override
@@ -86,7 +110,7 @@ public class BezierSurface extends SurfaceView implements SurfaceHolder.Callback
         @Override
         public void run() {
             while (isRunning) {
-                if (new Random().nextInt(20) % 20 == 0)
+                if (new Random().nextInt(10) % 10 == 0)
                     post(new Runnable() {
                         @Override
                         public void run() {
@@ -104,11 +128,10 @@ public class BezierSurface extends SurfaceView implements SurfaceHolder.Callback
                 try {
                     if (holders != null && holders.size() > 0) {
                         synchronized (LOCK) {
-                            Iterator<ShapeHolder> it = holders.iterator();
+                            Iterator<ShapeHolderWithCalc> it = holders.iterator();
                             while (it.hasNext()) {
-                                ShapeHolder holder = it.next();
+                                ShapeHolderWithCalc holder = it.next();
                                 if (holder.animatorEnd) {
-
                                     it.remove();
                                 } else {
                                     holder.draw(canvas);
@@ -125,10 +148,11 @@ public class BezierSurface extends SurfaceView implements SurfaceHolder.Callback
             }
 
             try {
-                Thread.sleep(20);
+                Thread.sleep(FRESH_FREQUENCY);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
     }
+
 }

@@ -85,6 +85,11 @@ public class CurveAnimationView extends View {
 		mPath = path;
 		canvas.drawPath(path, paint);
 
+		paint.setStyle(Paint.Style.FILL);
+		paint.setColor(Color.RED);
+		paint.setTextSize(50);
+		canvas.drawText("click this view", w/5, h/2, paint);
+
 		if(ball != null){
 			paint.setStyle(Paint.Style.FILL);
 			paint.setColor(Color.RED);
