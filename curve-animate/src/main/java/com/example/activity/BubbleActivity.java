@@ -3,6 +3,8 @@ package com.example.activity;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.MotionEvent;
+import android.view.View;
 
 import com.example.view.HeartSurfaceView;
 import com.example.view.R;
@@ -13,12 +15,26 @@ public class BubbleActivity extends AppCompatActivity {
 
 	HeartSurfaceView heartSurfaceView;
 
+	int intervaltime = 1000;
+	long lasttime;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_bubble);
 
 		heartSurfaceView = (HeartSurfaceView) findViewById(R.id.surface);
+		heartSurfaceView.setOnTouchListener(new View.OnTouchListener() {
+			@Override
+			public boolean onTouch(View view, MotionEvent motionEvent) {
+				if(motionEvent.getAction() == MotionEvent.ACTION_MOVE)
+				if(System.currentTimeMillis() - lasttime > 10){
+					heartSurfaceView.addShapeHolder();
+					lasttime = System.currentTimeMillis();
+				}
+				return false;
+			}
+		});
 		init();
 	}
 
@@ -29,9 +45,9 @@ public class BubbleActivity extends AppCompatActivity {
 			@Override
 			public void run() {
 				heartSurfaceView.addShapeHolder();
-				handler.postDelayed(this, 50 * random.nextInt(2));
+				handler.postDelayed(this, intervaltime);
 			}
 		};
-		handler.postDelayed(r, 50);
+		handler.postDelayed(r, intervaltime);
 	}
 }
