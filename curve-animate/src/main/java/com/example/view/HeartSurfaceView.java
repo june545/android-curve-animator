@@ -12,29 +12,28 @@ import android.view.SurfaceView;
 import android.view.View;
 
 import com.example.util.CanvasUtil;
+import com.example.util.FPSUtil;
 
 import java.util.Iterator;
-import java.util.Random;
 import java.util.Vector;
 
 /**
  * Created by June on 2016/8/2.
  */
-public class BezierSurfaceWithCalc extends SurfaceView implements SurfaceHolder.Callback {
-
-    static final int FRESH_FREQUENCY = 40; // ms
+public class HeartSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
+    static final int FPS = 30;
 
     final Object LOCK = new Object();
-    Vector<ShapeHolderWithCalc> holders = new Vector<>();
+    Vector<HeartShapeHolder> holders = new Vector<>();
 
-    MyThread updateThread;
+    RefreshThread refreshThread; // 刷新线程
 
     Paint mPaint = new Paint();
 
     private int mWidth;
     private int mHeight;
 
-    public BezierSurfaceWithCalc(Context context, AttributeSet attrs) {
+    public HeartSurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
     }
@@ -49,13 +48,17 @@ public class BezierSurfaceWithCalc extends SurfaceView implements SurfaceHolder.
             }
         });
 
-        updateThread = new MyThread(getHolder());
+        refreshThread = new RefreshThread(getHolder());
     }
 
-    private void addShapeHolder() {
-        ShapeHolderWithCalc holder = new ShapeHolderWithCalc();
+	/**
+     * 添加心形动画
+     */
+    public void addShapeHolder() {
+        HeartShapeHolder holder = new HeartShapeHolder();
         holder.setPath(CanvasUtil.buildBezierPath(mWidth, mHeight));
         holder.setPaint(mPaint);
+//        holder.setImage(HeartDrawer.buildHeart(120, 100));
         synchronized (LOCK) {
             holders.add(holder);
         }
@@ -66,11 +69,7 @@ public class BezierSurfaceWithCalc extends SurfaceView implements SurfaceHolder.
 
     @Override
     protected void onDraw(Canvas canvas) {
-        canvas.save();
-        mPaint.setStyle(Paint.Style.STROKE);
-        mPaint.setColor(Color.YELLOW);
-        canvas.drawRect(2, 2, mWidth, mHeight, mPaint);
-        canvas.restore();
+        super.onDraw(canvas);
     }
 
     @Override
@@ -83,8 +82,8 @@ public class BezierSurfaceWithCalc extends SurfaceView implements SurfaceHolder.
 
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
-        updateThread.isRunning = true;
-        updateThread.start();
+        refreshThread.isRunning = true;
+        refreshThread.start();
     }
 
     @Override
@@ -93,44 +92,47 @@ public class BezierSurfaceWithCalc extends SurfaceView implements SurfaceHolder.
 
     @Override
     public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-        updateThread.isRunning = false;
+        refreshThread.isRunning = false;
     }
 
     /**
      * update canvas
      */
-    class MyThread extends Thread {
+    class RefreshThread extends Thread {
         boolean isRunning;
         SurfaceHolder surfaceHolder;
 
-        public MyThread(SurfaceHolder holder) {
+        public RefreshThread(SurfaceHolder holder) {
             this.surfaceHolder = holder;
         }
 
         @Override
         public void run() {
             while (isRunning) {
-                if (new Random().nextInt(10) % 10 == 0)
-                    post(new Runnable() {
-                        @Override
-                        public void run() {
-                            addShapeHolder();
-                        }
-                    });
-
+                long t0 = System.nanoTime();
                 Canvas canvas = surfaceHolder.lockCanvas();
                 if (canvas == null) {
                     continue;
                 }
+                // 清楚虚影
                 Paint p = new Paint();
                 p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
                 canvas.drawPaint(p);
+
+                mPaint.setColor(Color.GREEN);
+                mPaint.setStyle(Paint.Style.FILL);
+                mPaint.setTextSize(50);
+                canvas.drawText(FPSUtil.add(), 20, 50, mPaint);
+
+                // 绘制holders中的图形
                 try {
                     if (holders != null && holders.size() > 0) {
                         synchronized (LOCK) {
-                            Iterator<ShapeHolderWithCalc> it = holders.iterator();
+                            canvas.drawText("HeartCount:" + holders.size(), 300, 50, mPaint);
+
+                            Iterator<HeartShapeHolder> it = holders.iterator();
                             while (it.hasNext()) {
-                                ShapeHolderWithCalc holder = it.next();
+                                HeartShapeHolder holder = it.next();
                                 if (holder.animatorEnd) {
                                     it.remove();
                                 } else {
@@ -145,12 +147,17 @@ public class BezierSurfaceWithCalc extends SurfaceView implements SurfaceHolder.
                     if (surfaceHolder != null)
                         surfaceHolder.unlockCanvasAndPost(canvas);
                 }
-            }
 
-            try {
-                Thread.sleep(FRESH_FREQUENCY);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                // 尽量稳定帧率
+                long delt = System.nanoTime() - t0;
+                long st = (long) ((1000000000F / FPS - delt) / 1000000);
+                if(st > 1) {
+                    try {
+                        Thread.sleep(st);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         }
     }

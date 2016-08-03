@@ -23,9 +23,11 @@ import java.util.List;
 import java.util.Random;
 
 /**
+ * 经过已知点的贝塞尔曲线
+ *
  * Created by June on 2016/7/29.
  */
-public class BezierCurveAnimation1 extends View {
+public class BezierCurveAnimationView extends View {
 
 	Path mPath;
 	PathMeasure pathMeasure;
@@ -34,7 +36,7 @@ public class BezierCurveAnimation1 extends View {
 	float sizeScale;
 	boolean animatorEnd = true;
 
-	public BezierCurveAnimation1(Context context, AttributeSet attrs) {
+	public BezierCurveAnimationView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		init();
 	}
@@ -130,10 +132,11 @@ public class BezierCurveAnimation1 extends View {
 		paint.setStyle(Paint.Style.STROKE);
 
 		if(animatorEnd)
-		drawPath(canvas, w, h);
+		 drawPath(canvas, w, h);
+		else canvas.drawPath(mPath,paint);
 
 		if(mPoint != null){
-			HeartDrawer.drawHeart1(canvas, mPoint.x, mPoint.y, 50 * sizeScale, mAlpha);
+			HeartDrawer.drawHeart1(canvas, mPoint.x, mPoint.y, 20 * sizeScale, mAlpha);
 		}
 
 		canvas.restore();
@@ -144,15 +147,16 @@ public class BezierCurveAnimation1 extends View {
 		Paint paint = new Paint();
 		paint.setStrokeWidth(1);
 		paint.setStyle(Paint.Style.STROKE);
+		paint.setColor(Color.GREEN);
 
 		List<Point> points = buildPoints(w, h, 5, w/5);
 		Collections.reverse(points);
 		List<Point> midPoints = midPoints(points);
 		List<Point> midMidPoints = midPoints(midPoints);
 
-//		drawSegmentPath(canvas, points);
-//		drawPoint(canvas, midPoints, Color.BLUE);
-//		drawPoint(canvas, midMidPoints, Color.GREEN);
+		drawSegmentPath(canvas, points);
+		drawPoint(canvas, midPoints, Color.BLUE);
+		drawPoint(canvas, midMidPoints, Color.GREEN);
 
 		List<Point> ctrlPoints = new ArrayList<>();
 		for (int i=0; i < midMidPoints.size(); i++){
@@ -164,7 +168,7 @@ public class BezierCurveAnimation1 extends View {
 			int y2 = points.get(i+1).y - midMidPoints.get(i).y + midPoints.get(i+1).y;
 			ctrlPoints.add(new Point(x2, y2));
 		}
-//		drawPoint(canvas, ctrlPoints, Color.YELLOW);
+		drawPoint(canvas, ctrlPoints, Color.YELLOW);
 
 		Path path = new Path();
 		for (int i=0; i < points.size(); i++){
@@ -178,10 +182,9 @@ public class BezierCurveAnimation1 extends View {
 			}
 		}
 
-//		canvas.drawPath(path, paint);
+		canvas.drawPath(path, paint);
 		mPath = path;
 	}
-
 
 	private List<Point> buildPoints(int w, int h, int count, int range){
 		List<Point> points = new ArrayList<>();
@@ -204,22 +207,20 @@ public class BezierCurveAnimation1 extends View {
 
 		// the end point
 		points.add(new Point(w/2, h));
-
 		return points;
 	}
 
 	private List<Point> midPoints(List<Point> points){
 		List<Point> midPoints = new ArrayList<>();
-
 		for (int i = 0; i < points.size() - 1; i++){
 			Point p = points.get(i);
 			Point next = points.get(i + 1);
 			midPoints.add(new Point((p.x + next.x) / 2, (p.y + next.y) / 2));
 		}
-
 		return midPoints;
 	}
 
+	// 已知点连成的线段
 	private void drawSegmentPath(Canvas canvas, List<Point> points){
 		Paint paint = new Paint();
 		paint.setColor(Color.BLACK);

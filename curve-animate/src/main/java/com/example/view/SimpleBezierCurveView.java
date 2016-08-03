@@ -14,24 +14,24 @@ import android.view.View;
 /**
  * Created by June on 2016/7/29.
  */
-public class CurveAnimationView extends View {
+public class SimpleBezierCurveView extends View {
 
 	Path mPath;
 	PointF ball;
 
 	PathMeasure pathMeasure;
 
-	public CurveAnimationView(Context context) {
+	public SimpleBezierCurveView(Context context) {
 		super(context);
 		init();
 	}
 
-	public CurveAnimationView(Context context, AttributeSet attrs) {
+	public SimpleBezierCurveView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		init();
 	}
 
-	public CurveAnimationView(Context context, AttributeSet attrs, int defStyleAttr) {
+	public SimpleBezierCurveView(Context context, AttributeSet attrs, int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
 		init();
 	}

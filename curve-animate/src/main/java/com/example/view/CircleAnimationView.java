@@ -99,6 +99,11 @@ public class CircleAnimationView extends View {
 
 		canvas.drawCircle(cx1, cy1, 10, paint); // draw a small ring
 
+		Path path = HeartDrawer.d();
+		canvas.drawPath(path, paint);
+		path.offset(w/3, h/3);
+		canvas.drawPath(path, paint);
+
 		canvas.restore();
 	}
 
