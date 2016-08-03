@@ -122,7 +122,7 @@ public class HeartSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                 mPaint.setColor(Color.GREEN);
                 mPaint.setStyle(Paint.Style.FILL);
                 mPaint.setTextSize(50);
-                canvas.drawText(FPSUtil.add(), 20, 50, mPaint);
+                canvas.drawText(FPSUtil.get(), 20, 50, mPaint);
 
                 // 绘制holders中的图形
                 try {

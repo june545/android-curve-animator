@@ -12,7 +12,7 @@ public class FPSUtil {
 	static int SIZE = 100;
 	static List<Long>  list = new ArrayList<>();
 
-	public static String add(){
+	public static String get(){
 		String s = "";
 		long t = System.nanoTime();
 		list.add(t);
