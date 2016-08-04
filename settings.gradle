@@ -1,1 +1,1 @@
-include ':app', ':beziercurve', ':curve-animate'
+include ':beziercurve', ':curve-animate'

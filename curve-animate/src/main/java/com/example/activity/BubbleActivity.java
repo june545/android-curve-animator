@@ -15,7 +15,7 @@ public class BubbleActivity extends AppCompatActivity {
 
 	HeartSurfaceView heartSurfaceView;
 
-	int intervaltime = 1000;
+	int intervaltime = 10;
 	long lasttime;
 
 	@Override
@@ -45,7 +45,7 @@ public class BubbleActivity extends AppCompatActivity {
 			@Override
 			public void run() {
 				heartSurfaceView.addShapeHolder();
-				handler.postDelayed(this, intervaltime);
+				handler.postDelayed(this, intervaltime * random.nextInt(100));
 			}
 		};
 		handler.postDelayed(r, intervaltime);
