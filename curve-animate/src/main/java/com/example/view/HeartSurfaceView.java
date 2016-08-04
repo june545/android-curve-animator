@@ -114,7 +114,7 @@ public class HeartSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                 if (canvas == null) {
                     continue;
                 }
-                // 清楚虚影
+                // 清除虚影
                 Paint p = new Paint();
                 p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
                 canvas.drawPaint(p);
